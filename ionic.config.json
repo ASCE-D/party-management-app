@@ -1,0 +1,7 @@
+{
+  "name": "party-management-app",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}
