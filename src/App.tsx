@@ -1,24 +1,12 @@
-import React, { useEffect, useState } from "react";
-import {
-  IonApp,
-  IonRouterOutlet,
-  IonTabs,
-  IonTabBar,
-  IonTabButton,
-  IonIcon,
-  IonLabel,
-  IonTab,
-  setupIonicReact,
-  IonSpinner,
-} from "@ionic/react";
-import { IonReactRouter } from "@ionic/react-router";
-import { Route } from "react-router-dom";
-import { send, download, list } from "ionicons/icons";
-
-import ReceiveTab from "./components/ReceiveTab";
+import { useState, useEffect } from 'react';
+import { Redirect, Route } from 'react-router-dom';
+import { IonApp, IonRouterOutlet, IonSplitPane } from '@ionic/react';
+import { IonReactRouter } from '@ionic/react-router';
+import Menu from './components/Menu';
 import SendTab from "./components/SendTab";
 import RecordsTab from "./components/RecordsTab";
 import { dbService } from "./services/database.service";
+import { notificationService } from "./services/notification.service";
 
 // Ionic CSS
 import "@ionic/react/css/core.css";
@@ -26,85 +14,57 @@ import "@ionic/react/css/normalize.css";
 import "@ionic/react/css/structure.css";
 import "@ionic/react/css/typography.css";
 import "@ionic/react/css/padding.css";
-import "@ionic/react/css/float-elements.css";
-import "@ionic/react/css/text-alignment.css";
-import "@ionic/react/css/text-transformation.css";
 import "@ionic/react/css/flex-utils.css";
-import "@ionic/react/css/display.css";
+import "@ionic/react/css/flex.css";
 
-setupIonicReact();
+/* Theme variables */
+import "./theme/variables.css";
 
 const App: React.FC = () => {
   const [isDbReady, setIsDbReady] = useState(false);
+
+  const initializeApp = async () => {
+    try {
+      // Initialize database first
+      await dbService.initializeDatabase();
+      
+      // Initialize notification service
+      await notificationService.initialize();
+      
+      // Get FCM token for push notifications
+      const fcmToken = await notificationService.getFCMToken();
+      if (fcmToken) {
+        console.log("FCM Token received:", fcmToken);
+        // TODO: Send this token to your backend server for storing
+        // This token is used to send push notifications to this device
+      }
+      
+      setIsDbReady(true);
+    } catch (error) {
+      console.error("Failed to initialize app:", error);
+      setIsDbReady(true); // Continue anyway
+    }
+  };
 
   useEffect(() => {
     initializeApp();
   }, []);
 
-  const initializeApp = async () => {
-    try {
-      await dbService.initializeDatabase();
-      setIsDbReady(true);
-    } catch (error) {
-      console.error("Failed to initialize app:", error);
-    }
-  };
-
   if (!isDbReady) {
-    return (
-      <IonApp>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100vh",
-            flexDirection: "column",
-          }}
-        >
-          <IonSpinner name="crescent" />
-          <p>Initializing Database...</p>
-        </div>
-      </IonApp>
-    );
+    return <div className="ion-padding">Loading...</div>;
   }
 
   return (
     <IonApp>
       <IonReactRouter>
-        <IonTabs>
-          <IonRouterOutlet>
-            <Route exact path="/receive">
-              <ReceiveTab />
-            </Route>
-            <Route exact path="/send">
-              <SendTab />
-            </Route>
-            <Route exact path="/records">
-              <RecordsTab />
-            </Route>
-            <Route exact path="/">
-              <ReceiveTab />
-            </Route>
+        <IonSplitPane contentId="main">
+          <Menu />
+          <IonRouterOutlet id="main">
+            <Route path="/send" component={SendTab} exact={true} />
+            <Route path="/records" component={RecordsTab} exact={true} />
+            <Route exact path="/" render={() => <Redirect to="/send" />} />
           </IonRouterOutlet>
-
-          <IonTabBar slot="bottom">
-            <IonTabButton tab="receive" href="/receive">
-              <IonIcon icon={download} />
-              <IonLabel>Receive</IonLabel>
-            </IonTabButton>
-
-            <IonTabButton tab="send" href="/send">
-              <IonIcon icon={send} />
-              <IonLabel>Send</IonLabel>
-            </IonTabButton>
-
-            <IonTabButton tab="records" href="/records">
-              <IonIcon icon={list} />
-              <IonLabel>Records</IonLabel>
-            </IonTabButton>
-          </IonTabBar>
-        </IonTabs>
+        </IonSplitPane>
       </IonReactRouter>
     </IonApp>
   );
