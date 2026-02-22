@@ -1,27 +1,36 @@
-import { CapacitorConfig } from "@capacitor/cli";
+import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: "com.yourcompany.partyapp",
-  appName: "Party Management",
-  webDir: "dist",
+  appId: 'com.partyapp.party',
+  appName: 'Party Management',
+  webDir: 'dist',
   server: {
-    androidScheme: "https",
+    androidScheme: 'https'
   },
   plugins: {
-    Camera: {
-      permissions: ["camera", "photos"],
+    SplashScreen: {
+      launchShowDuration: 3000,
+      launchAutoHide: true,
+      backgroundColor: "#ffffff",
+      splashFullScreen: true,
+      splashImmersive: true,
+      layoutName: "launch_screen",
+      useLegacyLayout: false,
     },
-    CapacitorSQLite: {
-      iosDatabaseLocation: "default",
-      androidDatabaseLocation: "default",
+    LocalNotifications: {
+      smallIcon: "ic_notification",
+      iconColor: "#488AFF",
     },
     Filesystem: {
-      // Configure secure storage
-      iosPaths: {
+      directories: {
         documents: 'DOCUMENTS',
         data: 'DATA'
       },
-    }
+    },
+    FirebaseMessaging: {
+      // FCM configuration - will be handled by google-services.json
+    },
   },
 };
+
 export default config;
