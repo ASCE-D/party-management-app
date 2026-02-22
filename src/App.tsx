@@ -40,10 +40,34 @@ const App: React.FC = () => {
   useEffect(() => {
     initializeApp();
   }, []);
-
   const initializeApp = async () => {
     try {
       await dbService.initializeDatabase();
+
+      // Optional: Register for web push notifications using Firebase Cloud Messaging.
+      // Replace with a real user identifier from your auth/session system.
+      const userId = "demo-user";
+
+      try {
+        const { registerForPushNotifications, listenForForegroundMessages } =
+          await import("./services/notifications.service");
+        await registerForPushNotifications({
+          userId,
+          vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY as string,
+          registerTokenEndpoint: import.meta.env
+            .VITE_REGISTER_DEVICE_TOKEN_ENDPOINT as string,
+        });
+
+        listenForForegroundMessages((payload) => {
+          // You can wire this into your UI/toast system.
+          // eslint-disable-next-line no-console
+          console.log("FCM foreground message:", payload);
+        });
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn("Push registration skipped/failed:", e);
+      }
+
       setIsDbReady(true);
     } catch (error) {
       console.error("Failed to initialize app:", error);
