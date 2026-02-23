@@ -21,7 +21,10 @@ const config: CapacitorConfig = {
         documents: 'DOCUMENTS',
         data: 'DATA'
       },
-    }
+    },
+    FirebaseMessaging: {
+      // FCM configuration - will be handled by google-services.json
+    },
   },
 };
 export default config;
