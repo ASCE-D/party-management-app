@@ -19,6 +19,7 @@ import ReceiveTab from "./components/ReceiveTab";
 import SendTab from "./components/SendTab";
 import RecordsTab from "./components/RecordsTab";
 import { dbService } from "./services/database.service";
+import { notificationService } from "./services/notification.service";
 
 // Ionic CSS
 import "@ionic/react/css/core.css";
@@ -43,7 +44,20 @@ const App: React.FC = () => {
 
   const initializeApp = async () => {
     try {
+      // Initialize database first
       await dbService.initializeDatabase();
+      
+      // Initialize notification service
+      await notificationService.initialize();
+      
+      // Get FCM token for push notifications
+      const fcmToken = await notificationService.getFCMToken();
+      if (fcmToken) {
+        console.log("FCM Token received:", fcmToken);
+        // TODO: Send this token to your backend server for storing
+        // This token is used to send push notifications to this device
+      }
+      
       setIsDbReady(true);
     } catch (error) {
       console.error("Failed to initialize app:", error);
