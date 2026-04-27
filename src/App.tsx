@@ -19,6 +19,8 @@ import ReceiveTab from "./components/ReceiveTab";
 import SendTab from "./components/SendTab";
 import RecordsTab from "./components/RecordsTab";
 import { dbService } from "./services/database.service";
+import { notificationService } from "./services/notification.service";
+import { awsConfig, isAWSConfigured } from "./config/aws.config";
 
 // Ionic CSS
 import "@ionic/react/css/core.css";
@@ -43,7 +45,46 @@ const App: React.FC = () => {
 
   const initializeApp = async () => {
     try {
+      // Initialize database first
       await dbService.initializeDatabase();
+      
+      // Initialize notification service with FCM and SNS
+      const snsConfig = isAWSConfigured()
+        ? {
+            sns: {
+              region: awsConfig.region,
+              accessKeyId: awsConfig.accessKeyId,
+              secretAccessKey: awsConfig.secretAccessKey,
+              platformApplicationArn: awsConfig.platformApplicationArn,
+            },
+          }
+        : undefined;
+
+      await notificationService.initialize(snsConfig);
+      
+      // Get FCM token for push notifications
+      const fcmToken = await notificationService.getFCMToken();
+      if (fcmToken) {
+        console.log("FCM Token received:", fcmToken);
+        // TODO: Send this token to your backend server for storing
+        // This token is used to send push notifications to this device
+        
+        // Register device with SNS if configured
+        if (awsConfig.platformApplicationArn) {
+          const endpointArn = await notificationService.registerDeviceWithSNS(
+            fcmToken,
+            awsConfig.platformApplicationArn
+          );
+          if (endpointArn) {
+            console.log("Device registered with SNS:", endpointArn);
+          }
+        }
+      }
+
+      // Log notification service status
+      console.log("Push notifications available:", notificationService.isPushAvailable());
+      console.log("SNS available:", notificationService.isSNSAvailable());
+      
       setIsDbReady(true);
     } catch (error) {
       console.error("Failed to initialize app:", error);
