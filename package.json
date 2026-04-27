@@ -12,6 +12,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@capacitor-community/fcm": "^7.0.0",
     "@capacitor-community/sqlite": "^7.0.1",
     "@capacitor/android": "7.4.2",
     "@capacitor/app": "7.0.2",
@@ -20,6 +21,7 @@
     "@capacitor/filesystem": "^7.1.4",
     "@capacitor/haptics": "7.0.2",
     "@capacitor/keyboard": "7.0.2",
+    "@capacitor/local-notifications": "^7.0.2",
     "@capacitor/share": "^7.0.2",
     "@capacitor/status-bar": "7.0.2",
     "@capawesome/capacitor-file-picker": "^7.2.0",
@@ -27,6 +29,7 @@
     "@ionic/react-router": "^8.5.0",
     "@types/react-router": "^5.1.20",
     "@types/react-router-dom": "^5.3.3",
+    "aws-sdk": "^2.1692.0",
     "ionicons": "^7.4.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
